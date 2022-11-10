@@ -104,7 +104,7 @@ def provision_wifi():
     client = mqtt.Client(BLID)
     client.tls_set_context(create_ssl_context())
     client.username_pw_set(BLID, PASSWORD)
-    client.connect("192.168.10.1", 8883, 60)
+    client.connect(HOST, PORT, 60)
 
     time.sleep(1)
     for msg in msgs:
