@@ -6,6 +6,8 @@ import socket
 import ssl
 import struct
 import time
+from ssl import SSLContext
+
 import paho.mqtt.client as mqtt
 
 # Get Robot CA
@@ -39,13 +41,23 @@ HOST="192.168.10.1"
 PORT=8883
 
 
+def create_ssl_context():
+    ssl_context = SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    ssl_context.set_ciphers('DEFAULT@SECLEVEL=1')
+    ssl_context.check_hostname = False
+    ssl_context.load_verify_locations('robot-ca.pem')
+    ssl_context.verify_mode = ssl.CERT_NONE
+    return ssl_context
+
+
 def provision_password():
     payload=MAGIC_PACKET+PASSWORD
     authentication_exchange=b'\xf0'+bytes([len(payload)])+payload
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(10)
-    wrappedSocket = ssl.wrap_socket(sock, ssl_version=ssl.PROTOCOL_TLS, ciphers='DEFAULT@SECLEVEL=1')
+    ssl_context = create_ssl_context()
+    wrappedSocket = ssl_context.wrap_socket(sock)
 
     try:
         wrappedSocket.connect((HOST, PORT))
@@ -90,10 +102,8 @@ def provision_password():
 
 def provision_wifi():
     client = mqtt.Client(BLID)
-    client.tls_set(ca_certs='robot-ca.pem', cert_reqs=ssl.CERT_NONE, tls_version=ssl.PROTOCOL_TLS, ciphers='DEFAULT@SECLEVEL=1')
-    client.tls_insecure_set(True)
+    client.tls_set_context(create_ssl_context())
     client.username_pw_set(BLID, PASSWORD)
-    client.tls_insecure_set(True)
     client.connect("192.168.10.1", 8883, 60)
 
     time.sleep(1)
