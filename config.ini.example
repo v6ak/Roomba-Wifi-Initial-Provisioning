@@ -1,0 +1,15 @@
+[roomba]
+# You can find your BLID in the Roomba's SSID
+blid=ABCDEF0123456789
+
+# If you want to use some specific Roomba password rather than generate a new one, you can put it there:
+# password=sdf
+# If you don't know WTF it is, you probably don't want to configure it.
+
+[locale]
+# Put your timezone
+timezone=Europe/Prague
+
+[wifi]
+ssid=your-ssid
+psk=your-secret-password
